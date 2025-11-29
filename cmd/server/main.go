@@ -28,9 +28,16 @@ func main() {
 
 	defer channel.Close()
 
-	_, _, err = pubsub.DeclateAndBind(connection, "peril_topic", "game_logs", "game_logs.*", pubsub.Durable)
+	err = pubsub.SubscribeGob(
+		connection,
+		routing.ExchangePerilTopic,
+		routing.GameLogSlug,
+		routing.GameLogSlug+".*",
+		pubsub.Durable,
+		handlerLogs(),
+	)
 	if err != nil {
-		log.Fatal("Failed to declare and bind game logs queue:", err)
+		log.Fatalf("could not starting consuming logs: %v", err)
 	}
 
 	gamelogic.PrintServerHelp()
